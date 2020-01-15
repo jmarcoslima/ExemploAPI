@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().hide();
+
         listview = findViewById(R.id.lista);
         final ArrayAdapter<String> adapter =
                 new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nomes);
@@ -83,11 +85,13 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, DetalhesActivity.class);
                 String nomeDog = listview.getItemAtPosition(position).toString();
-                nomeDog.toLowerCase();
                 intent.putExtra("nomeDog", nomeDog);
                 startActivity(intent);
+
+
             }
         });
+
     }
 
 
@@ -99,4 +103,6 @@ public class MainActivity extends AppCompatActivity {
 
         return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
+
+
 }

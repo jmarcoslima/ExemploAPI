@@ -7,27 +7,50 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_gravity="center"
-        android:layout_height="wrap_content"
-        tools:srcCompat="@tools:sample/avatars[0]" />
+        android:layout_marginTop="30dp" />
 
     <TextView
         android:id="@+id/nomeDog"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        android:textSize="36sp" />
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/nomeSub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/subRacas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="10dp"
+        android:text="Sub-raças"
+        android:textSize="20sp" />
+
 
     <ListView
         android:id="@+id/listaSub"
-        android:layout_width="fill_parent"
-        android:layout_height="300dp"
+        android:layout_width="372dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"></ListView>
+        android:layout_alignParentTop="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"></ListView>
 
 
 </LinearLayout>
