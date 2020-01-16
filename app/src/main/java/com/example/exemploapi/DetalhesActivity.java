@@ -3,6 +3,7 @@ package com.example.exemploapi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -34,7 +35,8 @@ public class DetalhesActivity extends AppCompatActivity {
     TextView tv, tvSub, tvtSubRacas;
     ImageView fotoDog;
     ListView listaSub;
-    String nomeDog, urlImagem, urlInicio = "https://dog.ceo/api/breed/", nomeSub;
+    String nomeDog, urlInicio = "https://dog.ceo/api/breed/", nomeSub;
+    String urlImagem;
 
 
     final ArrayList<String> subNomes = new ArrayList<>();
@@ -42,7 +44,6 @@ public class DetalhesActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 
 
         setContentView(R.layout.activity_detalhes);
@@ -77,7 +78,6 @@ public class DetalhesActivity extends AppCompatActivity {
         String url = urlInicio + nomeDog.toLowerCase() + "/list";
         if (nomeSub.equals("")) {
             urlImagem = urlInicio + nomeDog.toLowerCase() + "/images/random";
-
         } else {
             urlImagem = urlInicio + nomeDog.toLowerCase() + "/" + nomeSub.toLowerCase() + "/images/random";
         }
@@ -117,7 +117,8 @@ public class DetalhesActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         try {
                             String imagemUrl = response.getString("message");
-                            Picasso.get().load(imagemUrl).resize(200, 200).into(fotoDog);
+                            Picasso.get().load(imagemUrl).resize(200, 200).placeholder(R.drawable.gifload).into(fotoDog);
+                            imageShared(imagemUrl);
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -151,6 +152,14 @@ public class DetalhesActivity extends AppCompatActivity {
             }
         });
 
+
+    }
+
+    private void imageShared(String urlI) {
+        SharedPreferences preferences = getSharedPreferences("user_preferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("urlImagem", urlI);
+        editor.commit();
     }
 
 

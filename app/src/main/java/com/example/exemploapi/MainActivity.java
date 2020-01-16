@@ -4,11 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.android.volley.Request;
@@ -19,6 +21,7 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,6 +35,8 @@ import static android.webkit.ConsoleMessage.MessageLevel.LOG;
 public class MainActivity extends AppCompatActivity {
     ListView listview;
     final ArrayList<String> nomes = new ArrayList<>();
+    String ftUltima;
+    ImageView ultimoDog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +45,10 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         listview = findViewById(R.id.lista);
+        ultimoDog = findViewById(R.id.ftDog);
         final ArrayAdapter<String> adapter =
                 new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nomes);
         listview.setAdapter(adapter);
-
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -104,5 +109,14 @@ public class MainActivity extends AppCompatActivity {
         return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
+    @Override
+    protected void onResume() {
+        SharedPreferences preferences = getSharedPreferences("user_preferences", MODE_PRIVATE);
+        ftUltima = preferences.getString("urlImagem", "");
 
+        if (ftUltima != null) {
+            Picasso.get().load(ftUltima).resize(200, 200).placeholder(R.drawable.gifload).into(ultimoDog);
+        }
+        super.onResume();
+    }
 }
