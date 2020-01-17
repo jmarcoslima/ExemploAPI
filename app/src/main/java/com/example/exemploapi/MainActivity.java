@@ -1,6 +1,8 @@
 package com.example.exemploapi;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
@@ -28,74 +30,28 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static android.webkit.ConsoleMessage.MessageLevel.LOG;
 
 
 public class MainActivity extends AppCompatActivity {
-    ListView listview;
-    final ArrayList<String> nomes = new ArrayList<>();
-    String ftUltima;
-    ImageView ultimoDog;
+    private List<Raca> racas = new ArrayList<>();
+    private String ftUltima;
+    private ImageView ultimoDog;
+    private RecyclerView rv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
+        jsonRequest();
 
-        listview = findViewById(R.id.lista);
+        rv = findViewById(R.id.rv);
         ultimoDog = findViewById(R.id.ftDog);
-        final ArrayAdapter<String> adapter =
-                new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nomes);
-        listview.setAdapter(adapter);
-
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://dog.ceo/api/breeds/list";
-
-        // Request a string response from the provided URL.
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            String a;
-                            JSONArray array = response.getJSONArray("message");
-                            for (int i = 0; i < array.length(); i++) {
-                                a = capitalize(array.get(i).toString());
-                                nomes.add(a);
-                            }
-
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        adapter.notifyDataSetChanged();
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-
-        queue.add(request);
-
-
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, DetalhesActivity.class);
-                String nomeDog = listview.getItemAtPosition(position).toString();
-                intent.putExtra("nomeDog", nomeDog);
-                startActivity(intent);
-
-
-            }
-        });
+        RecyclerView.LayoutManager lm = new LinearLayoutManager(this);
+        rv.setLayoutManager(lm);
 
     }
 
@@ -107,6 +63,38 @@ public class MainActivity extends AppCompatActivity {
 
 
         return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
+    public void jsonRequest() {
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "https://dog.ceo/api/breeds/list";
+
+        // Request a string response from the provided URL.
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray array = response.getJSONArray("message");
+                            for (int i = 0; i < array.length(); i++) {
+                                Raca r = new Raca();
+                                r.setNome(capitalize(array.get(i).toString()));
+                                racas.add(r);
+                            }
+                            rv.setAdapter(new ListaAdapter(racas));
+                            registerForContextMenu(rv);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        queue.add(request);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.example.exemploapi;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,42 +30,43 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.exemploapi.MainActivity.capitalize;
 
 public class DetalhesActivity extends AppCompatActivity {
-    TextView tv, tvSub, tvtSubRacas;
-    ImageView fotoDog;
-    ListView listaSub;
-    String nomeDog, urlInicio = "https://dog.ceo/api/breed/", nomeSub;
-    String urlImagem;
-
-
-    final ArrayList<String> subNomes = new ArrayList<>();
+    private TextView tv, tvSub, tvtSubRacas;
+    private ImageView fotoDog;
+    private String nomeDog, urlInicio = "https://dog.ceo/api/breed/", nomeSub;
+    private String urlImagem;
+    private RecyclerView rvD;
+    private ArrayList<Raca> subRacas = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         setContentView(R.layout.activity_detalhes);
         getSupportActionBar().hide();
+        jsonRequest();
         tv = findViewById(R.id.nomeDog);
         tvSub = findViewById(R.id.nomeSub);
         fotoDog = findViewById(R.id.imageView);
-        listaSub = findViewById(R.id.listaSub);
         tvtSubRacas = findViewById(R.id.subRacas);
+        rvD = findViewById(R.id.rvD);
+        RecyclerView.LayoutManager lm = new LinearLayoutManager(this);
+        rvD.setLayoutManager(lm);
 
-
-        final ArrayAdapter<String> adapter =
-                new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, subNomes);
-        listaSub.setAdapter(adapter);
 
         Bundle extras = getIntent().getExtras();
+        Log.e("aaaaaaaaaaaaaaa", extras.toString());
         if (extras != null) {
             nomeDog = extras.getString("nomeDog");
-            nomeSub = extras.getString("nomeSub", "");
+            for(int i = 0; i < 20; i++) {
+                Log.e("aaaa", nomeDog);
+            }
+            //nomeSub = extras.getString("nomeSub", "");
         }
+        /*
         if (nomeSub.equals("")) {
             tv.setText("Raça: " + nomeDog);
 
@@ -74,42 +77,12 @@ public class DetalhesActivity extends AppCompatActivity {
         }
 
 
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = urlInicio + nomeDog.toLowerCase() + "/list";
         if (nomeSub.equals("")) {
             urlImagem = urlInicio + nomeDog.toLowerCase() + "/images/random";
         } else {
             urlImagem = urlInicio + nomeDog.toLowerCase() + "/" + nomeSub.toLowerCase() + "/images/random";
         }
-
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            String a;
-                            JSONArray array = response.getJSONArray("message");
-                            for (int i = 0; i < array.length(); i++) {
-                                a = capitalize(array.get(i).toString());
-                                subNomes.add(a);
-                            }
-
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        adapter.notifyDataSetChanged();
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-
+*/
 
         JsonObjectRequest requestImagem = new JsonObjectRequest(Request.Method.GET, urlImagem, null,
                 new Response.Listener<JSONObject>() {
@@ -124,7 +97,7 @@ public class DetalhesActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
 
-                        adapter.notifyDataSetChanged();
+                        //adapter.notifyDataSetChanged();
 
                     }
                 }, new Response.ErrorListener() {
@@ -133,15 +106,10 @@ public class DetalhesActivity extends AppCompatActivity {
 
             }
         });
+    }
 
 
-        queue.add(requestImagem);
-        if (nomeSub.equals("")) {
-            queue.add(request);
-        }
-
-
-        listaSub.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+       /* listaSub.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(DetalhesActivity.this, DetalhesActivity.class);
@@ -151,15 +119,47 @@ public class DetalhesActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+*/
 
-
-    }
 
     private void imageShared(String urlI) {
         SharedPreferences preferences = getSharedPreferences("user_preferences", MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("urlImagem", urlI);
         editor.commit();
+    }
+
+    public void jsonRequest() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = urlInicio + nomeDog.toLowerCase() + "/list";
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray array = response.getJSONArray("message");
+                            for (int i = 0; i < array.length(); i++) {
+                                Raca r = new Raca();
+                                r.setNome(capitalize(array.get(i).toString()));
+                                subRacas.add(r);
+
+                            }
+                            rvD.setAdapter(new ListaAdapter(subRacas));
+                            registerForContextMenu(rvD);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        //adapter.notifyDataSetChanged();
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        });
+        queue.add(request);
     }
 
 
