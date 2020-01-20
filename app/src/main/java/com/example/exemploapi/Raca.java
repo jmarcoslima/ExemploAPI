@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class Raca {
     private String nome;
+
     private String urlImagem;
     private ArrayList<String> subNome = new ArrayList<String>();
 

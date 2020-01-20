@@ -82,7 +82,17 @@ public class MainActivity extends AppCompatActivity {
                                 r.setNome(capitalize(array.get(i).toString()));
                                 racas.add(r);
                             }
-                            rv.setAdapter(new ListaAdapter(racas));
+                            ListaAdapter adapter = new ListaAdapter(racas);
+                            adapter.setItemClickListener(new ItemClickListener() {
+                                @Override
+                                public void onItemClick(int position) {
+                                    Intent i = new Intent(MainActivity.this,DetalhesActivity.class);
+                                    String nomeDog = racas.get(position).toString();
+                                    i.putExtra("nomeDog",nomeDog);
+                                    startActivity(i);
+                                }
+                            });
+                            rv.setAdapter(adapter);
                             registerForContextMenu(rv);
                         } catch (JSONException e) {
                             e.printStackTrace();

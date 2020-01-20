@@ -1,6 +1,7 @@
 package com.example.exemploapi;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +15,15 @@ import java.util.List;
 
 public class ListaAdapter extends RecyclerView.Adapter<ListaAdapter.ListaViewHolder> {
     private List<Raca> racas;
+    private ItemClickListener itemClickListener;
+
 
     public ListaAdapter(List<Raca> racas) {
         this.racas = racas;
+    }
+
+    public void setItemClickListener(ItemClickListener itemClickListener) {
+        this.itemClickListener = itemClickListener;
     }
 
     @NonNull
@@ -49,12 +56,9 @@ public class ListaAdapter extends RecyclerView.Adapter<ListaAdapter.ListaViewHol
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                        racas.get(getAdapterPosition());
-                        Intent intent = new Intent(itemView.getContext(), DetalhesActivity.class);
-                        String nomeDog = racas.get(getAdapterPosition()).toString();
-                        intent.putExtra("nomeDog", nomeDog);
-                        itemView.getContext().startActivity(intent);
+                    itemClickListener.onItemClick(getAdapterPosition());
                 }
+
             });
         }
     }

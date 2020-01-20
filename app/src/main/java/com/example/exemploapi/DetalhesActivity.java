@@ -37,17 +37,16 @@ import static com.example.exemploapi.MainActivity.capitalize;
 public class DetalhesActivity extends AppCompatActivity {
     private TextView tv, tvSub, tvtSubRacas;
     private ImageView fotoDog;
-    private String nomeDog, urlInicio = "https://dog.ceo/api/breed/", nomeSub;
-    private String urlImagem;
+    private String nomeDog, nomeSubDog, urlInicio = "https://dog.ceo/api/breed/", url, urlImagem;
     private RecyclerView rvD;
-    private ArrayList<Raca> subRacas = new ArrayList<>();
+    private List<Raca> subRacas = new ArrayList<>();
+    private RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalhes);
         getSupportActionBar().hide();
-        jsonRequest();
         tv = findViewById(R.id.nomeDog);
         tvSub = findViewById(R.id.nomeSub);
         fotoDog = findViewById(R.id.imageView);
@@ -55,35 +54,73 @@ public class DetalhesActivity extends AppCompatActivity {
         rvD = findViewById(R.id.rvD);
         RecyclerView.LayoutManager lm = new LinearLayoutManager(this);
         rvD.setLayoutManager(lm);
-
-
         Bundle extras = getIntent().getExtras();
-        Log.e("aaaaaaaaaaaaaaa", extras.toString());
+
         if (extras != null) {
-            nomeDog = extras.getString("nomeDog");
-            for(int i = 0; i < 20; i++) {
-                Log.e("aaaa", nomeDog);
+            nomeDog = extras.getString("nomeDog", "");
+            nomeSubDog = extras.getString("nomeSub", "");
+            url = urlInicio + nomeDog.toLowerCase() + "/list";
+            if (nomeSubDog.equals("")) {
+                urlImagem = urlInicio + nomeDog.toLowerCase() + "/images/random";
+            } else {
+                urlImagem = urlInicio + nomeDog.toLowerCase() + "/" + nomeSubDog.toLowerCase() + "/images/random";
             }
-            //nomeSub = extras.getString("nomeSub", "");
+            queue = Volley.newRequestQueue(this);
+            jsonRequest();
+            jsonRequestImage();
+
         }
-        /*
-        if (nomeSub.equals("")) {
-            tv.setText("Raça: " + nomeDog);
+    }
 
-        } else {
-            tv.setText("Raça: " + nomeDog);
-            tvSub.setText("Sub-raça: " + nomeSub);
-            tvtSubRacas.setText("");
+    private void imageShared(String urlI) {
+        SharedPreferences preferences = getSharedPreferences("user_preferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("urlImagem", urlI);
+        editor.commit();
+    }
+
+    public void jsonRequest() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray array = response.getJSONArray("message");
+                            for (int i = 0; i < array.length(); i++) {
+                                Raca r = new Raca();
+                                r.setNome(capitalize(array.get(i).toString()));
+                                subRacas.add(r);
+
+                            }
+                            ListaAdapter adapter = new ListaAdapter(subRacas);
+                            adapter.setItemClickListener(new ItemClickListener() {
+                                @Override
+                                public void onItemClick(int position) {
+                                    Intent i = new Intent(DetalhesActivity.this, DetalhesActivity.class);
+                                    String nomeSub = subRacas.get(position).toString();
+                                    i.putExtra("nomeDog", nomeDog);
+                                    i.putExtra("nomeSub", nomeSub);
+                                    startActivity(i);
+                                }
+                            });
+                            rvD.setAdapter(adapter);
+                            registerForContextMenu(rvD);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        });
+        if (nomeSubDog.equals("")) {
+            queue.add(request);
         }
+    }
 
-
-        if (nomeSub.equals("")) {
-            urlImagem = urlInicio + nomeDog.toLowerCase() + "/images/random";
-        } else {
-            urlImagem = urlInicio + nomeDog.toLowerCase() + "/" + nomeSub.toLowerCase() + "/images/random";
-        }
-*/
-
+    public void jsonRequestImage() {
         JsonObjectRequest requestImagem = new JsonObjectRequest(Request.Method.GET, urlImagem, null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -97,8 +134,6 @@ public class DetalhesActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
 
-                        //adapter.notifyDataSetChanged();
-
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -106,60 +141,8 @@ public class DetalhesActivity extends AppCompatActivity {
 
             }
         });
-    }
+        queue.add(requestImagem);
 
-
-       /* listaSub.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(DetalhesActivity.this, DetalhesActivity.class);
-                String nomeSub = listaSub.getItemAtPosition(position).toString();
-                intent.putExtra("nomeSub", nomeSub);
-                intent.putExtra("nomeDog", nomeDog);
-                startActivity(intent);
-            }
-        });
-*/
-
-
-    private void imageShared(String urlI) {
-        SharedPreferences preferences = getSharedPreferences("user_preferences", MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("urlImagem", urlI);
-        editor.commit();
-    }
-
-    public void jsonRequest() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = urlInicio + nomeDog.toLowerCase() + "/list";
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            JSONArray array = response.getJSONArray("message");
-                            for (int i = 0; i < array.length(); i++) {
-                                Raca r = new Raca();
-                                r.setNome(capitalize(array.get(i).toString()));
-                                subRacas.add(r);
-
-                            }
-                            rvD.setAdapter(new ListaAdapter(subRacas));
-                            registerForContextMenu(rvD);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        //adapter.notifyDataSetChanged();
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-            }
-        });
-        queue.add(request);
     }
 
 
